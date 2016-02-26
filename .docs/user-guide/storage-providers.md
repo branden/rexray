@@ -11,21 +11,28 @@ This page reviews the storage providers and platforms supported by `REX-Ray`.
 The Amazon EC2 driver registers a storage driver named `ec2` with the `REX-Ray`
 driver manager and is used to connect and manage storage on EC2 instances. The
 EC2 driver is made possible by the
-[goamz project](https://github.com/mitchellh/goamz).
+[official Amazon Go AWS SDK](https://github.com/aws/aws-sdk-go.git).
 
-### Configuration
-The following is an example configuration of the AWS EC2 driver.
+### Providing credentials.
 
+There are several ways to provide AWS credentials to use with EC2 drivers.
+They are listed below in precedence order - first one matched wins:
+
+1. Describe it in `config.yml` as follows:
 ```yaml
 aws:
     accessKey: MyAccessKey
     secretKey: MySecretKey
     region:    USNW
 ```
-
 For information on the equivalent environment variable and CLI flag names
 please see the section on how non top-level configuration properties are
 [transformed](./config/#all-other-properties).
+
+ This method is inherited from `goamz` used in earlier verion of `rexray`,
+and kept for upward compatibility.
+
+1. Standard Amazon-way, described [here](http://docs.aws.amazon.com/amazonswf/latest/awsrbflowguide/set-up-creds.html)
 
 ### Activating the Driver
 To activate the EC2 driver please follow the instructions for
@@ -327,7 +334,7 @@ parameter.
 - By default the password is the same as your administrative MDM password.
 - Start the gateway `service scaleio-gateway start`.
  - With 1.32 we have noticed a restart of the gateway may be necessary as well
-after an initial install with `service scaleio-gateway restart`. 
+after an initial install with `service scaleio-gateway restart`.
 
 ### Activating the Driver
 To activate the ScaleIO driver please follow the instructions for
