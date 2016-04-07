@@ -480,12 +480,17 @@ func (d *driver) createVolume(
 
 	d.createVolumeEnsureAvailabilityZone(&availabilityZone, &server)
 
+	// only forward iops if it's non-zero
+	var iops *int64
+	if IOPS > 0 {
+		iops = &IOPS
+	}
 	options := &ec2.CreateVolumeInput{
 		Size:             &size,
 		SnapshotId:       &snapshotID,
 		AvailabilityZone: &availabilityZone,
 		VolumeType:       &volumeType,
-		Iops:             &IOPS,
+		Iops:             iops,
 	}
 
 	var resp *ec2.Volume
