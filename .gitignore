@@ -1,9 +1,7 @@
-glide.lock
 .site/
 site/
 .build/*/
 .build/*-filtered.json
-vendor/
 .project
 
 # Created by https://www.gitignore.io
