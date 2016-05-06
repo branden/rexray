@@ -23,12 +23,14 @@ import (
 
 	"github.com/emccode/rexray/core"
 	"github.com/emccode/rexray/core/errors"
+	"sync"
 )
 
 const providerName = "ec2"
 
 // The EC2 storage driver.
 type driver struct {
+	mutex            *sync.Mutex
 	instanceDocument *instanceIdentityDocument
 	ec2Instance      *ec2.EC2
 	ec2creds         *credentials.Credentials
@@ -822,6 +824,9 @@ func (d *driver) AttachVolume(
 	if volumeID == "" {
 		return nil, errors.ErrMissingVolumeID
 	}
+
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 
 	nextDeviceName, err := d.GetDeviceNextAvailable()
 	if err != nil {
