@@ -66,6 +66,7 @@ func newDriver() core.Driver {
 
 func (d *driver) Init(r *core.RexRay) error {
 	d.r = r
+	d.mutex = &sync.Mutex{}
 
 	fields := eff(map[string]interface{}{
 		"moduleName": d.r.Context,
