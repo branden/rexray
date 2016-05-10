@@ -102,7 +102,7 @@ func (d *driver) Init(r *core.RexRay) error {
 			},
 		})
 
-	config := aws.NewConfig().WithCredentials(d.ec2creds).WithRegion(region)
+	config := aws.NewConfig().WithCredentials(d.ec2creds).WithRegion(region).WithMaxRetries(10)
 
 	d.ec2Instance = ec2.New(mySession, config)
 
