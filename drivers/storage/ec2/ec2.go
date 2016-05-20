@@ -14,6 +14,7 @@ import (
 	"github.com/akutz/gofig"
 	"github.com/akutz/goof"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
@@ -522,6 +523,12 @@ func (d *driver) createVolumeCreateSnapshot(
 		return "", err
 	}
 
+	err = d.waitSnapshotComplete(snapshots[0].SnapshotID)
+
+	if err != nil {
+		return "", err
+	}
+
 	return snapshots[0].SnapshotID, nil
 }
 
@@ -537,8 +544,9 @@ func (d *driver) createVolumeCreateVolume(
 	for {
 		resp, err = d.ec2Instance.CreateVolume(options)
 		if err != nil {
-			if err.Error() ==
-				"Snapshot is in invalid state - pending (IncorrectState)" {
+			if awsErrMessage(err) ==
+				"Snapshot is in invalid state - pending" {
+				// Really, snapshot should be created already
 				time.Sleep(1 * time.Second)
 				continue
 			}
@@ -717,6 +725,9 @@ func (d *driver) waitSnapshotComplete(snapshotID string) error {
 		snapshot := snapshots[0]
 		if *snapshot.State == ec2.SnapshotStateCompleted {
 			break
+		}
+		if *snapshot.State == ec2.SnapshotStateError {
+			return fmt.Errorf("%s", *snapshot.StateMessage)
 		}
 		time.Sleep(1 * time.Second)
 	}
@@ -1012,4 +1023,11 @@ func configRegistration() *gofig.Registration {
 	r.Key(gofig.String, "", "", "", "aws.secretKey")
 	r.Key(gofig.String, "", "", "", "aws.region")
 	return r
+}
+
+func awsErrMessage(err error) string {
+	if awsErr, ok := err.(awserr.Error); ok {
+		return awsErr.Message()
+	}
+	return ""
 }
